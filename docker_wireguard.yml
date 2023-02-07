@@ -1,30 +1,30 @@
-version: "3"
-
-# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/ 
-# https://hub.docker.com/r/pihole/pihole
+# https://github.com/linuxserver/docker-wireguard/issues/106
+version: "2.1"
 services:
-  pihole:
-    container_name: pihole
-    image: pihole/pihole:latest
-    # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "67:67/udp"
-      - "2180:2180/tcp"
-    environment:
-      TZ: 'America/New_York'
-      WEBPASSWORD: 'SomePassword'
-      ServerIP: '192.168.86.2'
-      WEB_PORT: '2180'
-      BLOCK_ICLOUD_PR: 'false'
-    # Volumes store your data between container upgrades
-    volumes:
-      - './etc-pihole:/etc/pihole'
-      - './etc-dnsmasq.d:/etc/dnsmasq.d'
-      - './resolv.conf:/etc/resolv.conf'
-    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wgvpn
     cap_add:
-      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - SERVERURL=ddnsipdnsname.com
+      - SERVERPORT=51820
+      - PEERS=6
+      - PEERDNS=192.168.86.1  # try with Pihole container IP. Join Bridge nw
+      - INTERNAL_SUBNET=10.13.13.0
+      - ALLOWEDIPS=0.0.0.0/0
+      - LOG_CONFS=true
+    volumes:
+        - /usr/src:/usr/src
+        - /lib/modules:/lib/modules
+        - './opt-wg:/config'
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
-	
+    
