@@ -11,7 +11,7 @@ services:
       - "53:53/tcp"
       - "53:53/udp"
       - "67:67/udp"
-      - "2180:2180/tcp"
+      - "2180:2180/tcp" # Default port 80:
     environment:
       TZ: 'America/New_York'
       WEBPASSWORD: 'SomePassword'
